@@ -1,0 +1,70 @@
+accessWidener v2 named
+
+
+accessible field net/minecraft/world/level/biome/BiomeManager biomeZoomSeed J
+accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
+accessible field net/minecraft/client/multiplayer/ClientChunkCache storage Lnet/minecraft/client/multiplayer/ClientChunkCache$Storage;
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getChunk (I)Lnet/minecraft/world/level/chunk/LevelChunk;
+
+accessible field net/minecraft/client/renderer/LevelRenderer lastViewDistance I
+accessible field net/minecraft/client/renderer/GameRenderer renderDistance F
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage getIndex (II)I
+
+
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage replace (ILnet/minecraft/world/level/chunk/LevelChunk;)V
+
+accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunks Ljava/util/concurrent/atomic/AtomicReferenceArray;
+
+accessible method net/minecraft/client/multiplayer/ClientChunkCache isValidChunk (Lnet/minecraft/world/level/chunk/LevelChunk;II)Z
+
+accessible field net/minecraft/client/Minecraft levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
+
+mutable field net/minecraft/client/Minecraft levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
+
+accessible field net/minecraft/client/renderer/GameRenderer mainCamera Lnet/minecraft/client/Camera;
+
+mutable field net/minecraft/client/renderer/GameRenderer mainCamera Lnet/minecraft/client/Camera;
+
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
+
+accessible method net/minecraft/client/renderer/ViewArea getRenderChunkAt (Lnet/minecraft/core/BlockPos;)Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+
+accessible method net/minecraft/client/renderer/ViewArea getChunkIndex (III)I
+
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
+
+accessible method net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo <init> (Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;Lnet/minecraft/core/Direction;I)V
+
+accessible field net/minecraft/client/renderer/LevelRenderer renderChunksInFrustum Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
+
+mutable field net/minecraft/client/renderer/LevelRenderer renderChunksInFrustum Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
+
+
+accessible field net/minecraft/client/renderer/chunk/ChunkRenderDispatcher level Lnet/minecraft/client/multiplayer/ClientLevel;
+
+
+accessible field net/minecraft/client/particle/ParticleEngine level Lnet/minecraft/client/multiplayer/ClientLevel;
+
+
+accessible field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+mutable field net/minecraft/client/Minecraft mainRenderTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+
+accessible field net/minecraft/client/renderer/LevelRenderer transparencyChain Lnet/minecraft/client/renderer/PostChain;
+
+accessible field net/minecraft/client/renderer/GameRenderer postEffect Lnet/minecraft/client/renderer/PostChain;
+
+accessible field net/minecraft/client/renderer/GameRenderer effectActive Z
+
+accessible field net/minecraft/client/renderer/PostChain screenTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+
+accessible method net/minecraft/client/renderer/LevelRenderer initTransparency ()V
+
+accessible field net/minecraft/client/Minecraft window Lcom/mojang/blaze3d/platform/Window;
+
+accessible field net/minecraft/client/Minecraft renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+accessible field net/minecraft/client/Minecraft blockEntityRenderDispatcher Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;
+mutable field net/minecraft/client/Minecraft renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+
+
+accessible field net/minecraft/client/multiplayer/ClientLevel levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
+mutable field net/minecraft/client/multiplayer/ClientLevel levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;

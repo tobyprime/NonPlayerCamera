@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NonPlayerCamera.iml" filepath="$PROJECT_DIR$/.idea/modules/NonPlayerCamera.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NonPlayerCamera.client.iml" filepath="$PROJECT_DIR$/.idea/modules/NonPlayerCamera.client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NonPlayerCamera.main.iml" filepath="$PROJECT_DIR$/.idea/modules/NonPlayerCamera.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/NonPlayerCamera.test.iml" filepath="$PROJECT_DIR$/.idea/modules/NonPlayerCamera.test.iml" />
+    </modules>
+  </component>
+</project>
