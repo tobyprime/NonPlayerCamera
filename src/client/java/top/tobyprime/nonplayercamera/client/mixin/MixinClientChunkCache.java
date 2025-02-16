@@ -17,8 +17,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientChunkMap;
-import top.tobyprime.nonplayercamera.client.render.NonPlayerLevelRenderer;
+
+import top.tobyprime.nonplayercamera.client.common.LevelManager;
+import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeChunkCacheStorage;
 import top.tobyprime.nonplayercamera.utils.Helper;
 
 import java.util.function.Consumer;
@@ -49,7 +50,7 @@ public abstract class MixinClientChunkCache {
         if (!isNonPlayerLevel()) {
             return;
         }
-        ((BridgeClientChunkMap) (Object) this.storage).setNonPlayerLevelRenderer(NonPlayerLevelRenderer.onCreatingLevelRenderer);
+        ((BridgeChunkCacheStorage) (Object) this.storage).setDimension(LevelManager.onCreatingDimension);
     }
 
     @Inject(method = "updateViewRadius", at = @At("HEAD"), cancellable = true)

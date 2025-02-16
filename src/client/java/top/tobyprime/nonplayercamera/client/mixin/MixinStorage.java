@@ -1,61 +1,65 @@
 package top.tobyprime.nonplayercamera.client.mixin;
 
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.SectionPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
+
+import java.util.Set;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import top.tobyprime.nonplayercamera.client.common.NonPlayerCamera;
-import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientChunkMap;
-import top.tobyprime.nonplayercamera.client.render.NonPlayerLevelRenderer;
+
+import top.tobyprime.nonplayercamera.client.common.RenderingManager;
+import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeCamera;
+import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeChunkCacheStorage;
 
 @Mixin(ClientChunkCache.Storage.class)
-public class MixinStorage implements BridgeClientChunkMap {
-    @Unique
-    public NonPlayerLevelRenderer getNonPlayerLevelRenderer() {
-        return nonPlayerLevelRenderer;
-    }
+public class MixinStorage implements BridgeChunkCacheStorage {
+
 
     @Unique
-    public void setNonPlayerLevelRenderer(NonPlayerLevelRenderer nonPlayerLevelRenderer) {
-        this.nonPlayerLevelRenderer = nonPlayerLevelRenderer;
-    }
-
-    @Unique
-    public NonPlayerLevelRenderer nonPlayerLevelRenderer = null;
-
-    @Inject(method = "getChunk", at = @At("RETURN"), cancellable = true)
-    void getChunk(int index, CallbackInfoReturnable<LevelChunk> cir) {
-        if (nonPlayerLevelRenderer == null || cir.getReturnValue() != null) {
-            return;
-        }
-
-        if (nonPlayerLevelRenderer.level.dimension() == Minecraft.getInstance().level.dimension()) {
-            var mainChunkMap = Minecraft.getInstance().level.getChunkSource().storage;
-            cir.setReturnValue(mainChunkMap.getChunk(index));
-        }
-
-    }
+    public ResourceKey<Level> dimension = null;
 
 
     @Inject(method = "inRange", at = @At("HEAD"), cancellable = true)
     void isInRadius(int chunkX, int chunkZ, CallbackInfoReturnable<Boolean> cir) {
-        if (nonPlayerLevelRenderer == null) {
+        if (dimension == null) {
             return;
         }
 
-        for (NonPlayerCamera camera : nonPlayerLevelRenderer.activeCameras) {
-            var cameraChunkPos = new ChunkPos(camera.getBlockPosition());
-            if (Math.abs(chunkX - cameraChunkPos.x) <= camera.viewDistance && Math.abs(chunkZ - cameraChunkPos.z) <= camera.viewDistance) {
+        Set<Camera> activatedCameras = RenderingManager.activatedCameras.get(dimension);
+    
+        for (Camera camera : activatedCameras) {          
+            var viewDistance = ((BridgeCamera) camera).getRenderingData().viewDistance;
+            var xInRange =  SectionPos.blockToSectionCoord(camera.getBlockPosition().getX()) <= viewDistance;
+            var zInRange = SectionPos.blockToSectionCoord(camera.getBlockPosition().getZ()) <= viewDistance;
+            if (xInRange && zInRange) {
                 cir.setReturnValue(true);
                 return;
             }
         }
+
         cir.setReturnValue(false);
+    }
+
+
+    @Override
+    public ResourceKey<Level> getDimension() {
+        return dimension;
+    }
+
+    @Override
+    public void setDimension(ResourceKey<Level> dimension) {
+        this.dimension = dimension;
     }
 }

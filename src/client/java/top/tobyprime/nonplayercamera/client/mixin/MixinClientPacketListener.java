@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import top.tobyprime.nonplayercamera.client.common.NonPlayerLevelManager;
-import top.tobyprime.nonplayercamera.client.render.NonPlayerLevelRenderer;
+
+import top.tobyprime.nonplayercamera.client.common.LevelManager;
 import top.tobyprime.nonplayercamera.client.utils.ChunkHelper;
 import top.tobyprime.nonplayercamera.mixin_bridge.BridgeClientboundLevelChunkWithLightPacket;
 import top.tobyprime.nonplayercamera.utils.Helper;
@@ -46,7 +46,7 @@ public class MixinClientPacketListener {
             return;
         }
 
-        var nonPlayerLevel = NonPlayerLevelManager.clientLevelMap.get(chunkLevel);
+        var nonPlayerLevel = LevelManager.levelMap.get(chunkLevel);
         if (nonPlayerLevel == null || nonPlayerLevel.equals(Minecraft.getInstance().level)) {
             Helper.dbg("handle player chunk data");
             return;

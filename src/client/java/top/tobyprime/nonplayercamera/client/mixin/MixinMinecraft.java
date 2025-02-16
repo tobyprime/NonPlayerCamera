@@ -18,9 +18,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain;
-import top.tobyprime.nonplayercamera.client.common.NonPlayerLevelManager;
-import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeLevelRenderer;
-import top.tobyprime.nonplayercamera.client.render.NonPlayerLevelRenderer;
+import top.tobyprime.nonplayercamera.client.common.LevelManager;
+
+
 
 import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.needRender;
 import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.testCamera;
@@ -34,36 +34,21 @@ public abstract class MixinMinecraft {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     public void onConstruct(CallbackInfo ci) {
-        NonPlayerLevelRenderer.secondaryRenderBuffers = new RenderBuffers();
+        // NonPlayerLevelRenderer.secondaryRenderBuffers = new RenderBuffers();
         NonPlayerCameraModClientMain.testFrameBuffer = new TextureTarget(1000,1000,true,false);
 
     }
     @Inject(method = "setLevel", at = @At(value = "RETURN"))
     public void onSetLevel(ClientLevel levelClient, CallbackInfo ci) {
-        var recorded = NonPlayerLevelManager.getLevel(levelClient.dimension());
-        if (levelClient.equals(recorded)) {
-            return;
+        var dimension = levelClient.dimension();
+        
+        var existingLevel = LevelManager.get(dimension);
+        // todo: access widen
+        if (existingLevel !=null) {
+            levelClient.chunkSource = existingLevel.chunkSource;
         }
-        if (recorded != null) {
-            NonPlayerLevelManager.clientLevelMap.remove(levelClient.dimension());
-        }
 
-        NonPlayerLevelManager.clientLevelMap.put(levelClient.dimension(), levelClient);
-
-
-
-        var renderer = NonPlayerLevelRenderer.nonPlayerLevelRendererMap.get(levelClient.dimension());
-        if (renderer != null) {
-            renderer.setLevel(levelClient);
-        }
-    }
-    @Inject(method = "getMainRenderTarget", at = @At("HEAD"), cancellable = true)
-    public void getMainRenderTarget(CallbackInfoReturnable<RenderTarget> cir) {
-        if (NonPlayerLevelRenderer.isNonPlayerRendering() && ( (BridgeLevelRenderer)NonPlayerLevelRenderer.currentNonPlayerRendering.levelRenderer).getRenderTarget()!=null) {
-            var r = (BridgeLevelRenderer)NonPlayerLevelRenderer.currentNonPlayerRendering.levelRenderer;
-
-            cir.setReturnValue(r.getRenderTarget());
-        }
+        LevelManager.levelMap.put(dimension, levelClient);
     }
 
 
@@ -82,23 +67,21 @@ public abstract class MixinMinecraft {
         if (NonPlayerCameraModClientMain.testCamera==null){
             return;
         }
-        NonPlayerCameraModClientMain.testCamera.setRotation(mc.gameRenderer.mainCamera.getYRot(),mc.gameRenderer.mainCamera.getXRot());
-        if (closestBlock == null) {
-            return;
-        }
-        if (NonPlayerCameraModClientMain.testFrameBuffer.width != Minecraft.getInstance().mainRenderTarget.width) {
-            NonPlayerCameraModClientMain.testFrameBuffer = new TextureTarget( Minecraft.getInstance().mainRenderTarget.width,Minecraft.getInstance().mainRenderTarget.height,true,false);
-        }
-        var offset = player.position().subtract(Vec3.atCenterOf(closestBlock.getBlockPos()));
+        // NonPlayerCameraModClientMain.testCamera.setRotation(mc.gameRenderer.mainCamera.getYRot(),mc.gameRenderer.mainCamera.getXRot());
+        // if (closestBlock == null) {
+        //     return;
+        // }
+        // if (NonPlayerCameraModClientMain.testFrameBuffer.width != Minecraft.getInstance().mainRenderTarget.width) {
+        //     NonPlayerCameraModClientMain.testFrameBuffer = new TextureTarget( Minecraft.getInstance().mainRenderTarget.width,Minecraft.getInstance().mainRenderTarget.height,true,false);
+        // }
+        // var offset = player.position().subtract(Vec3.atCenterOf(closestBlock.getBlockPos()));
 
-        var preTestCamera = NonPlayerCameraModClientMain.testCamera.getPosition();
-        testCamera.setPosition(preTestCamera.add(offset));
-        testCamera.levelRenderer.levelRenderer.tick();
+        // var preTestCamera = NonPlayerCameraModClientMain.testCamera.getPosition();
+        // testCamera.setPosition(preTestCamera.add(offset));
+        // testCamera.levelRenderer.levelRenderer.tick();
 
-        testCamera.levelRenderer.levelRenderer.needsUpdate();
-        testCamera.levelRenderer.draw(NonPlayerCameraModClientMain.testCamera, NonPlayerCameraModClientMain.testFrameBuffer);
-        testCamera.setPosition(preTestCamera);
-
-
+        // testCamera.levelRenderer.levelRenderer.needsUpdate();
+        // testCamera.levelRenderer.draw(NonPlayerCameraModClientMain.testCamera, NonPlayerCameraModClientMain.testFrameBuffer);
+        // testCamera.setPosition(preTestCamera);
     }
 }
