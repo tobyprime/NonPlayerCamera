@@ -37,7 +37,7 @@ public class ServerCameraManager {
     public static void tickCamera(ServerCamera camera) {
         if (!camera.enabled) return;
 
-        var chunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(camera.level).getChunkSource().chunkMap;
+        var chunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(camera.dimension).getChunkSource().chunkMap;
         var chunkTicketManager = ((ChunkMap)chunkStorage).getDistanceManager();
         var chunkPos = new ChunkPos(camera.pos);
         chunkTicketManager.addTicket(CAMERA_CHUNK_TICKET,chunkPos,camera.viewDistance,chunkPos);
@@ -52,20 +52,20 @@ public class ServerCameraManager {
         }
 
         var cameras = camerasPerPlayer.get(uuid);
-        var newChunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(camera.level).getChunkSource().chunkMap;
+        var newChunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(camera.dimension).getChunkSource().chunkMap;
 
         if (cameras.containsKey(uuid)) {
-            var preCamera = cameras.get(camera.resourceLocation);
-            var preChunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(preCamera.level).getChunkSource().chunkMap;
+            var preCamera = cameras.get(camera.identifier);
+            var preChunkStorage = (BridgeChunkMap) camera.player.getServer().getLevel(preCamera.dimension).getChunkSource().chunkMap;
             preChunkStorage.getActivateCameras().remove(preCamera);
-            cameras.replace(camera.resourceLocation, camera);
+            cameras.replace(camera.identifier, camera);
             if (camera.enabled){
                 newChunkStorage.getActivateCameras().add(camera);
             }
             return;
         }
 
-        cameras.put(camera.resourceLocation, camera);
+        cameras.put(camera.identifier, camera);
         if (camera.enabled){
             newChunkStorage.getActivateCameras().add(camera);
         }
@@ -100,7 +100,7 @@ public class ServerCameraManager {
             return;
         }
         var server = camera.player.getServer();
-        var cameraServerLevel = server.getLevel(camera.level);
+        var cameraServerLevel = server.getLevel(camera.dimension);
 
         var chunkStorage = (BridgeChunkMap) cameraServerLevel.getChunkSource().chunkMap;
         chunkStorage.getActivateCameras().remove(camera);

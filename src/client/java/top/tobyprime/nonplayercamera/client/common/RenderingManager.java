@@ -27,7 +27,7 @@ public class RenderingManager {
     }
     public static void begin(RenderingContext context) {
         if (mainRenderingContext==null) {
-            mainRenderingContext = new RenderingContext(Minecraft.getInstance().gameRenderer.mainCamera);
+            mainRenderingContext = new RenderingContext();
         }
 
         context.apply();

@@ -24,12 +24,12 @@ public class UpdateCameraC2S implements Packet<ServerGamePacketListener> {
 
     public UpdateCameraC2S(FriendlyByteBuf buf) {
         camera = new ServerCamera();
-        camera.resourceLocation = buf.readResourceLocation();
+        camera.identifier = buf.readResourceLocation();
         camera.pos = buf.readBlockPos();
 
         camera.enabled = buf.readBoolean();
         camera.viewDistance = buf.readInt();
-        camera.level = ResourceKey.create(Registry.DIMENSION_REGISTRY, buf.readResourceLocation());
+        camera.dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, buf.readResourceLocation());
     }
 
     @Override
@@ -39,7 +39,7 @@ public class UpdateCameraC2S implements Packet<ServerGamePacketListener> {
 
         buf.writeBoolean(camera.enabled);
         buf.writeInt(camera.viewDistance);
-        buf.writeResourceLocation(camera.level.location());
+        buf.writeResourceLocation(camera.dimension.location());
     }
 
     @Override

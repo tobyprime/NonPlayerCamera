@@ -2,13 +2,13 @@ package top.tobyprime.nonplayercamera.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
 import top.tobyprime.nonplayercamera.client.common.RenderingManager;
+import top.tobyprime.nonplayercamera.client.common.SuperCamera;
 
-public class GameRendererForCamera {
-    public static void render(Camera camera,float partialTicks, long nanoTime){
+public class SuperGameRenderer {
+    public static void render(SuperCamera camera,float partialTicks, long nanoTime){
         var context = new RenderingContext(camera);
         RenderingManager.begin(context);
 

@@ -1,6 +1,5 @@
 package top.tobyprime.nonplayercamera.client.mixin;
 
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.SectionPos;
@@ -33,10 +32,6 @@ public class MixinClientPacketListener {
         PacketUtils.ensureRunningOnSameThread(packet, (ClientGamePacketListener) (Object)this, this.minecraft);
 
         var chunkLevel = ((BridgeClientboundLevelChunkWithLightPacket) packet).getLevelKey();
-
-        if (Minecraft.getInstance().level==null) {
-            return;
-        }
 
         var level = LevelManager.levelMap.get(chunkLevel);
         if (level == null) {

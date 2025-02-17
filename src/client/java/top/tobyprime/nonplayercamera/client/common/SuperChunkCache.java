@@ -19,10 +19,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData.BlockEntityTagOutput;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
-import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeCamera;
 
 public class SuperChunkCache extends ClientChunkCache {
-    public Map<Camera, Storage> storages;
+    public Map<SuperCamera, Storage> storages;
     public ClientLevel level;
 
     public SuperChunkCache(ClientLevel level) {
@@ -85,14 +84,14 @@ public class SuperChunkCache extends ClientChunkCache {
 
 
 
-    public void onCameraUpdated(Camera camera){
+    public void onCameraUpdated(SuperCamera camera){
         var storage = storages.get(camera);
         
         var newChunkPos = new ChunkPos(camera.getBlockPosition());
-        var cameraData = ((BridgeCamera)camera).getRenderingData();
-        var viewDistance = cameraData.viewDistance;
-        if (!cameraData.enabled && storage != null) {
-            storages.remove(cameraData);
+    
+        var viewDistance = camera.getViewDistance();
+        if (!camera.isEnabled() && storage != null) {
+            storages.remove(camera);
         }
 
         int x= storage.viewCenterX - newChunkPos.x;
