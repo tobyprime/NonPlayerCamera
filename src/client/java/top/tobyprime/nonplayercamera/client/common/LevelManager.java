@@ -99,4 +99,11 @@ public class LevelManager {
     
         return newLevel;
     }
+
+    public static void tickAll(){
+        for (var level : levelMap.values()) {
+            level.tick(()->true);
+        }
+    }
+
 }

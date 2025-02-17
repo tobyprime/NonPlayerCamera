@@ -1,13 +1,7 @@
 package top.tobyprime.nonplayercamera.client.render;
 
-import java.util.logging.Level;
-
-import com.mojang.blaze3d.pipeline.RenderTarget;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.phys.Vec3;
 import top.tobyprime.nonplayercamera.client.common.LevelManager;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeCamera;
 

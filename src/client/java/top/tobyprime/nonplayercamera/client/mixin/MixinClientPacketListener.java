@@ -2,16 +2,12 @@ package top.tobyprime.nonplayercamera.client.mixin;
 
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket;
-import net.minecraft.network.protocol.game.ClientboundLightUpdatePacketData;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -27,9 +23,6 @@ import top.tobyprime.nonplayercamera.client.utils.ChunkHelper;
 import top.tobyprime.nonplayercamera.mixin_bridge.BridgeClientboundLevelChunkWithLightPacket;
 import top.tobyprime.nonplayercamera.utils.Helper;
 
-import java.util.BitSet;
-import java.util.Iterator;
-
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
 
@@ -41,14 +34,12 @@ public class MixinClientPacketListener {
 
         var chunkLevel = ((BridgeClientboundLevelChunkWithLightPacket) packet).getLevelKey();
 
-        if (Minecraft.getInstance().level==null || chunkLevel == Minecraft.getInstance().level.dimension()) {
-            Helper.dbg("handle player chunk data");
+        if (Minecraft.getInstance().level==null) {
             return;
         }
 
-        var nonPlayerLevel = LevelManager.levelMap.get(chunkLevel);
-        if (nonPlayerLevel == null || nonPlayerLevel.equals(Minecraft.getInstance().level)) {
-            Helper.dbg("handle player chunk data");
+        var level = LevelManager.levelMap.get(chunkLevel);
+        if (level == null) {
             return;
         }
         Helper.dbg("handle nonplayer chunk data");
@@ -56,7 +47,7 @@ public class MixinClientPacketListener {
         var chunkData = packet.getChunkData();
         int x = packet.getX();
         int z = packet.getZ();
-        var level = nonPlayerLevel;
+        
         level.getChunkSource().replaceWithPacketData(packet.getX(), packet.getZ(), chunkData.getReadBuffer(), chunkData.getHeightmaps(), chunkData.getBlockEntitiesTagsConsumer(x, z));
 
 
