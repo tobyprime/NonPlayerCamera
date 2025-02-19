@@ -2,11 +2,16 @@ package top.tobyprime.nonplayercamera.client.common;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import top.tobyprime.nonplayercamera.common.ServerCamera;
@@ -16,30 +21,59 @@ import top.tobyprime.nonplayercamera.networking.UpdateCameraPosC2S;
 public class SuperCamera extends Camera {
     private ResourceKey<Level> dimension;
     private boolean enabled;
-    private int viewDistance;
+    private int viewDistance = 12;
     private final ResourceLocation identifier;
-
-    private BlockPos preUpdatedBlockPos;
-
+    public RenderBuffers renderBuffers = new RenderBuffers();
+    private BlockPos preUpdatedBlockPos = new BlockPos(0, 0, 0);
+    public boolean isolatedStorage = false;
     public RenderTarget target;
+    public double fov = 70;
+    public float cameraDepth = 0.05F;
+    public LevelRenderer renderer;
 
-    public SuperCamera(ResourceLocation identifier){
+    public SuperCamera(ResourceLocation identifier) {
         this.identifier = identifier;
+        this.renderBuffers = new RenderBuffers();
+        this.renderer = new LevelRenderer(Minecraft.getInstance(), renderBuffers);
     }
 
-    public void setRotation(float yRot,float xRot){
+    public Matrix4f getBasicProjectionMatrix() {
+        PoseStack PoseStack = new PoseStack();
+        PoseStack.last().pose().setIdentity();
+
+        PoseStack.last().pose().multiply(Matrix4f.perspective(fov, (float) target.width / target.height, cameraDepth, viewDistance * 16));
+        return PoseStack.last().pose();
+    }
+
+    @Override
+    public void setRotation(float yRot, float xRot) {
         super.setRotation(yRot, xRot);
     }
+
     @Override
-    public void setPosition(Vec3 pos){
+    public void setPosition(Vec3 pos) {
         super.setPosition(pos);
         notifyPositionUpdated();
     }
-    public ResourceKey<Level> getDimension(){
+
+    public ResourceKey<Level> getDimension() {
         return dimension;
     }
-    public void enbale(){
-        if (enabled == true){
+
+    public void setDimension(ResourceKey<Level> dimension) {
+        if (this.dimension == dimension) {
+            return;
+        }
+        var preChunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
+        this.renderer.setLevel(LevelManager.get(dimension));
+        this.dimension = dimension;
+        preChunkSource.onCameraUpdated(this);
+
+        notifyAllUpdated();
+    }
+
+    public void enable() {
+        if (enabled) {
             return;
         }
         enabled = true;
@@ -47,8 +81,8 @@ public class SuperCamera extends Camera {
         notifyAllUpdated();
     }
 
-    public void disable(){
-        if (enabled == false) {
+    public void disable() {
+        if (!enabled) {
             return;
         }
         enabled = false;
@@ -56,11 +90,11 @@ public class SuperCamera extends Camera {
         notifyAllUpdated();
     }
 
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public void setViewDistance(int distance){
+    public void setViewDistance(int distance) {
         if (viewDistance == distance) {
             return;
         }
@@ -68,11 +102,17 @@ public class SuperCamera extends Camera {
         notifyAllUpdated();
     }
 
-    public int getViewDistance(){
+    public int getViewDistance() {
         return viewDistance;
     }
 
-    public void notifyPositionUpdated(){
+    public void notifyPositionUpdated() {
+        if (LevelManager.get(dimension) == null) return;
+        if (isolatedStorage) {
+            var chunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
+            chunkSource.onCameraUpdated(this);
+        }
+
         if (preUpdatedBlockPos.closerThan(this.getBlockPosition(), 4)) {
             return;
         }
@@ -80,14 +120,24 @@ public class SuperCamera extends Camera {
         preUpdatedBlockPos = getBlockPosition();
 
     }
-    public void notifyAllUpdated(){
+
+    public void notifyAllUpdated() {
+        if (LevelManager.get(dimension) == null) return;
+
+        if (isolatedStorage) {
+            var chunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
+            chunkSource.onCameraUpdated(this);
+        }
+
+
         var serverCamera = new ServerCamera();
         serverCamera.enabled = this.enabled;
         serverCamera.dimension = this.dimension;
         serverCamera.pos = this.getBlockPosition();
         serverCamera.identifier = this.identifier;
 
-
         Minecraft.getInstance().getConnection().send(new UpdateCameraC2S(serverCamera));
+
+        return;
     }
 }

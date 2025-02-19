@@ -37,7 +37,6 @@ public class MixinClientPacketListener {
         if (level == null) {
             return;
         }
-        Helper.dbg("handle nonplayer chunk data");
 
         var chunkData = packet.getChunkData();
         int x = packet.getX();

@@ -1,5 +1,6 @@
 package top.tobyprime.nonplayercamera.client.common;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,14 +17,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import net.minecraft.world.level.dimension.DimensionType;
+import org.jetbrains.annotations.Nullable;
 
 
 public class LevelManager {
     // for init chunk cache;
     public static ResourceKey<Level> onCreatingDimension = null;
-    public static Map<ResourceKey<Level>, ClientLevel> levelMap;
+    public static Map<ResourceKey<Level>, ClientLevel> levelMap = new HashMap<>();
 
-    public static ClientLevel get(ResourceKey<Level> dimension){
+    public static @Nullable ClientLevel get(ResourceKey<Level> dimension){
         return levelMap.get(dimension);
     }
 

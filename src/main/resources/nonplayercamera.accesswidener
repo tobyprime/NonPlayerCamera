@@ -76,3 +76,22 @@ accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage inRa
 accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunkCount I
 
 accessible field net/minecraft/client/multiplayer/ClientChunkCache emptyChunk Lnet/minecraft/world/level/chunk/LevelChunk;
+
+accessible field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
+
+mutable field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
+
+
+accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
+accessible method net/minecraft/client/multiplayer/ClientChunkCache$Storage <init> (Lnet/minecraft/client/multiplayer/ClientChunkCache;I)V
+
+accessible method net/minecraft/client/Camera setRotation (FF)V
+
+accessible method net/minecraft/client/Camera setPosition (Lnet/minecraft/world/phys/Vec3;)V
+accessible method net/minecraft/client/Camera setPosition (DDD)V
+
+accessible field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+mutable field net/minecraft/client/renderer/GameRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+
+accessible field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+mutable field net/minecraft/client/renderer/LevelRenderer renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;

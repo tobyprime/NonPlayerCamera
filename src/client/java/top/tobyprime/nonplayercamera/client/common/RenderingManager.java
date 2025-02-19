@@ -8,22 +8,26 @@ import java.util.logging.Level;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.resources.ResourceKey;
 import top.tobyprime.nonplayercamera.client.render.RenderingContext;
 
 public class RenderingManager {
     public static Stack<RenderingContext> renderingContextStack = new Stack<>();
     public static Map<ResourceKey<Level>, Set<Camera>> activatedCameras = new HashMap<>();
+    public static Map<Camera, LevelRenderer> levelRendererMap = new HashMap<>();
     public static RenderingContext mainRenderingContext;
 
+    public static boolean isEnvModified(){
+        return !renderingContextStack.isEmpty();
+    }
+
     public static Camera getCurrentCamera(){
-        if (renderingContextStack.empty()) {
-            if (mainRenderingContext == null){
-                return Minecraft.getInstance().gameRenderer.getMainCamera();
-            }
-            return mainRenderingContext.camera;
+        var ctx =renderingContextStack.empty()?renderingContextStack.peek(): mainRenderingContext;
+        if (ctx == null){
+            return Minecraft.getInstance().gameRenderer.getMainCamera();
         }
-        return renderingContextStack.peek().camera;
+        return ctx.camera;
     }
     public static void begin(RenderingContext context) {
         if (mainRenderingContext==null) {
@@ -43,10 +47,11 @@ public class RenderingManager {
     }
 
     public static RenderingContext peekOrMain() {
-        var context = renderingContextStack.peek();
-        if (context != null) {
-            return context;
+        if (renderingContextStack.empty()) {
+            return mainRenderingContext;
+
         }
-        return mainRenderingContext;
+        return renderingContextStack.peek();
+
     }
 }

@@ -1,5 +1,6 @@
 package top.tobyprime.nonplayercamera.client.mixin;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,9 +17,10 @@ public class MixinRenderChunk{
 
     @Inject(method = "getDistToPlayerSqr", at=@At("RETURN"), cancellable = true)
     private void injectGetDistToPlayerSqr(CallbackInfoReturnable<Double> cir) {
-        double d = bb.minX + (double)8.0F - RenderingManager.getCurrentCamera().getPosition().x;
-        double e = bb.minY + (double)8.0F - RenderingManager.getCurrentCamera().getPosition().y;
-        double f = bb.minZ + (double)8.0F - RenderingManager.getCurrentCamera().getPosition().z;
+        var camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        double d = bb.minX + (double)8.0F - camera.getPosition().x;
+        double e = bb.minY + (double)8.0F - camera.getPosition().y;
+        double f = bb.minZ + (double)8.0F - camera.getPosition().z;
         cir.setReturnValue(d*d+e*e+f*f);
     }
 }
