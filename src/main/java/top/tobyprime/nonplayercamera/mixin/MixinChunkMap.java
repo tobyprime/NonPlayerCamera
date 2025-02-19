@@ -6,6 +6,7 @@ import net.minecraft.server.level.ChunkMap;
 
 import net.minecraft.server.level.PlayerMap;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,13 +44,12 @@ public abstract class MixinChunkMap implements BridgeChunkMap {
 
     @Inject(method = "getPlayers", at = @At("HEAD"), cancellable = true)
     public void getPlayers(ChunkPos chunkPos, boolean onlyOnWatchDistanceEdge, CallbackInfoReturnable<List<ServerPlayer>> cir) {
-        ImmutableList.Builder<ServerPlayer> builder = ImmutableList.builder();
-
+        Set<ServerPlayer> playerInChunk = new HashSet<>();
         for (ServerCamera camera : activateCameras) {
             SectionPos chunkSectionPos = SectionPos.of(camera.pos);
             if (onlyOnWatchDistanceEdge && isChunkOnRangeBorder(chunkPos.x, chunkPos.z, chunkSectionPos.getX(), chunkSectionPos.getZ(), camera.viewDistance)
                     || !onlyOnWatchDistanceEdge && isChunkInRange(chunkPos.x, chunkPos.z, chunkSectionPos.getX(), chunkSectionPos.getZ(), camera.viewDistance)) {
-                builder.add(camera.player);
+                playerInChunk.add(camera.player);
             }
         }
 
@@ -58,11 +58,11 @@ public abstract class MixinChunkMap implements BridgeChunkMap {
         for(ServerPlayer serverPlayerEntity : players) {
             SectionPos chunkSectionPos = serverPlayerEntity.getLastSectionPos();
             if (onlyOnWatchDistanceEdge && isChunkOnRangeBorder(chunkPos.x, chunkPos.z, chunkSectionPos.getX(), chunkSectionPos.getZ(), this.viewDistance) || !onlyOnWatchDistanceEdge && isChunkInRange(chunkPos.x, chunkPos.z, chunkSectionPos.getX(), chunkSectionPos.getZ(), this.viewDistance)) {
-                builder.add(serverPlayerEntity);
+                playerInChunk.add(serverPlayerEntity);
             }
         }
 
-        cir.setReturnValue(builder.build());
+        cir.setReturnValue(playerInChunk.stream().toList());
     }
 
     @Unique

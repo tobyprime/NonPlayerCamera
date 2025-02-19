@@ -5,12 +5,19 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 
-import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import top.tobyprime.nonplayercamera.NonPlayerCameraModMain;
+import top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain;
+import top.tobyprime.nonplayercamera.client.common.RenderingManager;
+import top.tobyprime.nonplayercamera.client.common.SuperCamera;
+
+import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.needRender;
 import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.testCamera;
 
 public class TestBlockEntityRenderer implements BlockEntityRenderer<NonPlayerCameraModMain.TestBlockEntity> {
@@ -46,43 +53,45 @@ public class TestBlockEntityRenderer implements BlockEntityRenderer<NonPlayerCam
     @Override
     public void render(NonPlayerCameraModMain.TestBlockEntity entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
         if (testCamera==null){
-            testCamera = new Camera();
-            // ((BridgeCamera) testCamera).setRenderingData(new CameraRenderingData());
-            // testCamera.setPosition(entity.getBlockPos().getX(), entity.getBlockPos().getY(), entity.getBlockPos().getZ());
 
-            // testCamera.setLevel(entity.getLevel().dimension());
-            // testCamera.enable();
-
+            var camera = new SuperCamera(new ResourceLocation("tst","test"));
+            camera.setPosition(entity.getBlockPos().getX(), entity.getBlockPos().getY(), entity.getBlockPos().getZ());
+            camera.setDimension(entity.getLevel().dimension());
+            camera.target = NonPlayerCameraModClientMain.testFrameBuffer;
+            camera.enable();
+            testCamera = camera;
         }
-        // if (NonPlayerLevelRenderer.isNonPlayerRendering()){
-            // return;
-        // }
-        // if (closestBlock==null){
-            // closestBlock = entity;
-        // }
-        // var cameraPrePos = testCamera.getPosition();
-        // var playerPos = Minecraft.getInstance().player.position();
-        // var dist = playerPos.distanceTo(Vec3.atCenterOf(entity.getBlockPos()));
-        // var distPre = playerPos.distanceTo(Vec3.atCenterOf(closestBlock.getBlockPos()));
-        // if (dist < distPre) {
-            // closestBlock = entity;
-        // }
-        // RenderSystem.setShaderTexture(0, NonPlayerCameraModClientMain.testFrameBuffer.getColorTextureId());
-        // needRender = true;
-        // matrices.pushPose();
+         if (RenderingManager.isEnvModified()){
+             return;
+         }
+         if (closestBlock==null){
+             closestBlock = entity;
+         }
+         var cameraPrePos = testCamera.getPosition();
+         var playerPos = Minecraft.getInstance().player.position();
+         var dist = playerPos.distanceTo(Vec3.atCenterOf(entity.getBlockPos()));
+         var distPre = playerPos.distanceTo(Vec3.atCenterOf(closestBlock.getBlockPos()));
+         var fov = (float)NonPlayerCameraModClientMain.testFrameBuffer.width/ NonPlayerCameraModClientMain.testFrameBuffer.height;
+         if (dist < distPre) {
+             closestBlock = entity;
+         }
+         RenderSystem.setShaderTexture(0, NonPlayerCameraModClientMain.testFrameBuffer.getColorTextureId());
+         needRender = true;
 
-        // RenderSystem.enableDepthTest();
-        // RenderSystem.disableCull();
-        // RenderSystem.disableBlend();
+         matrices.pushPose();
 
-        // renderQuad(matrices, (float) 10, (float) 10);
+         RenderSystem.enableDepthTest();
+         RenderSystem.disableCull();
+         RenderSystem.disableBlend();
 
-        // RenderSystem.enableBlend();
-        // RenderSystem.enableCull();
-        // RenderSystem.disableDepthTest();
+         renderQuad(matrices, (float) 2*fov, (float) 2);
 
-        // matrices.popPose();
-        // testCamera.setPosition(cameraPrePos);
+         RenderSystem.enableBlend();
+         RenderSystem.enableCull();
+         RenderSystem.disableDepthTest();
+
+         matrices.popPose();
+         testCamera.setPosition(cameraPrePos);
     }
 
 

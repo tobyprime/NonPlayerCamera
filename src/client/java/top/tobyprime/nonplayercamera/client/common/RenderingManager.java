@@ -1,30 +1,31 @@
 package top.tobyprime.nonplayercamera.client.common;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.logging.Level;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.resources.ResourceKey;
 import top.tobyprime.nonplayercamera.client.render.RenderingContext;
 
 public class RenderingManager {
     public static Stack<RenderingContext> renderingContextStack = new Stack<>();
     public static Map<ResourceKey<Level>, Set<Camera>> activatedCameras = new HashMap<>();
+    public static Map<Camera, LevelRenderer> levelRendererMap = new HashMap<>();
     public static RenderingContext mainRenderingContext;
 
-    public static Camera getCurrentCamera(){
-        if (renderingContextStack.empty()) {
-            if (mainRenderingContext == null){
-                return Minecraft.getInstance().gameRenderer.getMainCamera();
-            }
-            return mainRenderingContext.camera;
-        }
-        return renderingContextStack.peek().camera;
+    public static boolean isEnvModified(){
+        return !renderingContextStack.isEmpty();
     }
+
+    public static RenderingContext getCurrentContext(){
+        if(renderingContextStack.isEmpty()){
+            return Objects.requireNonNullElseGet(mainRenderingContext, RenderingContext::new);
+        }
+        return renderingContextStack.peek();
+    }
+
     public static void begin(RenderingContext context) {
         if (mainRenderingContext==null) {
             mainRenderingContext = new RenderingContext();
@@ -43,10 +44,9 @@ public class RenderingManager {
     }
 
     public static RenderingContext peekOrMain() {
-        var context = renderingContextStack.peek();
-        if (context != null) {
-            return context;
+        if (renderingContextStack.empty()) {
+            return mainRenderingContext;
         }
-        return mainRenderingContext;
+        return renderingContextStack.peek();
     }
 }

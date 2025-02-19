@@ -4,11 +4,12 @@
   "package": "top.tobyprime.nonplayercamera.client.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MixinClientChunkCache",
+    "ClientChunkCacheStorage",
+    "MixinCamera",
+    "MixinClientLevel",
     "MixinLevelRenderer",
     "MixinMinecraft",
-    "MixinRenderChunk",
-    "MixinStorage"
+    "MixinRenderChunk"
   ],
   "injectors": {
     "defaultRequire": 1
