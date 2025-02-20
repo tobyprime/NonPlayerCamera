@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.Level;
 
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
+import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
 
 
 public class LevelManager {
@@ -95,6 +97,7 @@ public class LevelManager {
                     e
             );
         }
+        ((BridgeClientLevel)newLevel).setParticleEngine(new ParticleEngine(newLevel, Minecraft.getInstance().getTextureManager()));
         onCreatingDimension = null;
     
         client.getProfiler().pop();

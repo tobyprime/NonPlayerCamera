@@ -23,7 +23,7 @@ public class SuperGameRenderer {
 
     public static void renderLevel(SuperCamera camera, float tickDelta, long limitTime, PoseStack matrices) {
         // todo: profile
-        // todo: 天气渲染有问题，粒子渲染有问题
+        // todo: 天气渲染有问题, 部分区块不渲染
 
         var client = Minecraft.getInstance();
         var gameRenderer = client.gameRenderer;

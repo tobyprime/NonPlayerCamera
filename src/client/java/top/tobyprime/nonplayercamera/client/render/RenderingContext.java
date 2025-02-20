@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.world.phys.Vec3;
@@ -18,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 import top.tobyprime.nonplayercamera.client.common.LevelManager;
 import top.tobyprime.nonplayercamera.client.common.RenderingManager;
 import top.tobyprime.nonplayercamera.client.common.SuperCamera;
+import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
 
 public class RenderingContext {
     // public final SuperCamera camera;
@@ -27,7 +29,7 @@ public class RenderingContext {
     public Vec3 cameraEntityPos;
     public RenderTarget renderTarget;
     public RenderBuffers buffers;
-
+    public ParticleEngine particleEngine;
     public RenderingContext(){
         Validate.isTrue(!RenderingManager.isEnvModified());
         var client = Minecraft.getInstance();
@@ -38,6 +40,8 @@ public class RenderingContext {
         this.cameraEntityPos = client.cameraEntity.position();
         this.renderTarget = client.mainRenderTarget;
         this.buffers = client.gameRenderer.renderBuffers;
+        this.particleEngine = client.particleEngine;
+
     }
     public RenderingContext(SuperCamera camera){
         this.camera = camera;
@@ -46,6 +50,7 @@ public class RenderingContext {
         this.renderTarget = camera.target;
         this.buffers = camera.renderBuffers;
         this.levelRenderer = camera.renderer;
+        this.particleEngine = ((BridgeClientLevel)this.level).getParticleEngine();
     }
 
     public void apply(){
@@ -69,7 +74,7 @@ public class RenderingContext {
         client.gameRenderer.renderBuffers = buffers;
         client.gameRenderer.mainCamera = camera;
 
-        client.particleEngine.setLevel(level);
+        client.particleEngine = this.particleEngine;
         client.blockEntityRenderDispatcher.setLevel(level);
 
         renderTarget.bindWrite(true);
