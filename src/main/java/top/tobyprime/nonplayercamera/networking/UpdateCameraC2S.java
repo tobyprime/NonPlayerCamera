@@ -11,7 +11,6 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import top.tobyprime.nonplayercamera.common.ServerCamera;
 import top.tobyprime.nonplayercamera.common.ServerCameraManager;
 import top.tobyprime.nonplayercamera.utils.Global;
-import top.tobyprime.nonplayercamera.utils.Helper;
 
 public class UpdateCameraC2S implements Packet<ServerGamePacketListener> {
     public static final ResourceLocation ID = new ResourceLocation(Global.MOD_ID, "update_camera");

@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.tobyprime.nonplayercamera.client.common.LevelManager;
 import top.tobyprime.nonplayercamera.client.utils.ChunkHelper;
 import top.tobyprime.nonplayercamera.mixin_bridge.BridgeClientboundLevelChunkWithLightPacket;
-import top.tobyprime.nonplayercamera.utils.Helper;
 
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
@@ -29,7 +28,7 @@ public class MixinClientPacketListener {
 
     @Inject(method = "handleLevelChunkWithLight", at = @At("HEAD"), cancellable = true)
     public void handleLevelChunkWithLight(ClientboundLevelChunkWithLightPacket packet, CallbackInfo ci) {
-        PacketUtils.ensureRunningOnSameThread(packet, (ClientGamePacketListener) (Object)this, this.minecraft);
+        PacketUtils.ensureRunningOnSameThread(packet, (ClientGamePacketListener) this, this.minecraft);
 
         var chunkLevel = ((BridgeClientboundLevelChunkWithLightPacket) packet).getLevelKey();
 

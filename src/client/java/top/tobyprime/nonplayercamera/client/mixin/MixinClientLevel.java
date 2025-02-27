@@ -1,12 +1,8 @@
 package top.tobyprime.nonplayercamera.client.mixin;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.ParticleEngine;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,7 +18,6 @@ import top.tobyprime.nonplayercamera.client.common.SuperChunkCache;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
 @Mixin(ClientLevel.class)
 public abstract class MixinClientLevel implements BridgeClientLevel {
@@ -43,7 +38,7 @@ public abstract class MixinClientLevel implements BridgeClientLevel {
     void setBlockDirty(BlockPos blockPos, BlockState oldState, BlockState newState, CallbackInfo ci) {
         var dimension = ((ClientLevel) (Object) this).dimension();
         for (var camera : LevelManager.getCamerasInDimension(dimension)) {
-            ((SuperCamera) camera).renderer.setBlockDirty(blockPos, oldState, newState);
+            camera.renderer.setBlockDirty(blockPos, oldState, newState);
         }
         if (dimension == Minecraft.getInstance().level.dimension()) {
             Minecraft.getInstance().levelRenderer.setBlockDirty(blockPos, oldState, newState);
@@ -54,7 +49,7 @@ public abstract class MixinClientLevel implements BridgeClientLevel {
     void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, CallbackInfo ci) {
         var dimension = ((ClientLevel) (Object) this).dimension();
         for (var camera : LevelManager.getCamerasInDimension(dimension)) {
-            ((SuperCamera) camera).renderer.setSectionDirtyWithNeighbors(sectionX, sectionY, sectionZ);
+            camera.renderer.setSectionDirtyWithNeighbors(sectionX, sectionY, sectionZ);
         }
         if (dimension == Minecraft.getInstance().level.dimension()) {
             Minecraft.getInstance().levelRenderer.setSectionDirtyWithNeighbors(sectionX, sectionY, sectionZ);

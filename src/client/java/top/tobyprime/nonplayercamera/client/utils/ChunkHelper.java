@@ -2,18 +2,14 @@ package top.tobyprime.nonplayercamera.client.utils;
 
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.ClientboundLightUpdatePacketData;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import net.minecraft.world.phys.AABB;
 
 import java.util.BitSet;
 import java.util.Iterator;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ChunkHelper {
     public static void updateLightingForLevel(ClientLevel level, int chunkX, int chunkZ, LevelLightEngine provider, LightLayer type, BitSet inited, BitSet uninited, Iterator<byte[]> nibbles, boolean nonEdge) {
@@ -22,7 +18,7 @@ public class ChunkHelper {
             boolean bl = inited.get(i);
             boolean bl2 = uninited.get(i);
             if (bl || bl2) {
-                provider.queueSectionData(type, SectionPos.of(chunkX, j, chunkZ), bl ? new DataLayer((byte[]) ((byte[]) nibbles.next()).clone()) : new DataLayer(), nonEdge);
+                provider.queueSectionData(type, SectionPos.of(chunkX, j, chunkZ), bl ? new DataLayer(nibbles.next().clone()) : new DataLayer(), nonEdge);
                 level.setSectionDirtyWithNeighbors(chunkX, j, chunkZ);
             }
         }

@@ -12,17 +12,13 @@ import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import top.tobyprime.nonplayercamera.client.mixin.MixinLevelRenderer;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeLevelRenderer;
 import top.tobyprime.nonplayercamera.common.ServerCamera;
 import top.tobyprime.nonplayercamera.networking.UpdateCameraC2S;
 import top.tobyprime.nonplayercamera.networking.UpdateCameraPosC2S;
-
-import java.util.HashSet;
 
 public class SuperCamera extends Camera {
     private ResourceKey<Level> dimension;

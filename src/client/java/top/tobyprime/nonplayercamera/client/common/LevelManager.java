@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 

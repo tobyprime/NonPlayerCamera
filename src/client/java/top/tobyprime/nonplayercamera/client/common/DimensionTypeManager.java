@@ -12,8 +12,7 @@ public class DimensionTypeManager {
     public static Map<ResourceKey<Level>, ResourceKey<DimensionType>> clientTypeMap;
 
     public static Set<ResourceKey<Level>> getAvailableDimensions() {
-        Set<ResourceKey<Level>> keys = Minecraft.getInstance().getConnection().levels();
-        return keys;
+        return Minecraft.getInstance().getConnection().levels();
     }
 
     public static ResourceKey<DimensionType> getDimensionTypeKey(ResourceKey<Level> LevelKey) {

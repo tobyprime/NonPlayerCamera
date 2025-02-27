@@ -2,13 +2,9 @@ package top.tobyprime.nonplayercamera.client.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.ViewArea;
-import net.minecraft.client.renderer.culling.Frustum;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -16,12 +12,9 @@ import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.tobyprime.nonplayercamera.client.common.SuperCamera;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeLevelRenderer;
-import top.tobyprime.nonplayercamera.client.render.LevelRendererUtils;
 
 @Mixin(LevelRenderer.class)
 public class MixinLevelRenderer implements BridgeLevelRenderer {

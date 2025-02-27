@@ -72,7 +72,7 @@ public abstract class MixinMinecraft {
         }
 
         LevelManager.levelMap.put(dimension, levelClient);
-        ((SuperChunkCache) levelClient.getChunkSource()).onMainCameraUpdated(this.gameRenderer.mainCamera);
+        SuperChunkCache.onMainCameraUpdated(this.gameRenderer.mainCamera);
     }
 
     // for test

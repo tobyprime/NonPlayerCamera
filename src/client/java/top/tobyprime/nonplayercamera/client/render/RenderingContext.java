@@ -1,12 +1,7 @@
 package top.tobyprime.nonplayercamera.client.render;
 
-import java.util.logging.Level;
-
 import com.mojang.blaze3d.pipeline.RenderTarget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -15,7 +10,6 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
-import org.lwjgl.opengl.GL11;
 import top.tobyprime.nonplayercamera.client.common.LevelManager;
 import top.tobyprime.nonplayercamera.client.common.RenderingManager;
 import top.tobyprime.nonplayercamera.client.common.SuperCamera;
@@ -23,13 +17,13 @@ import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
 
 public class RenderingContext {
     // public final SuperCamera camera;
-    public ClientLevel level;
-    public LevelRenderer levelRenderer;
-    public Camera camera;
+    public final ClientLevel level;
+    public final LevelRenderer levelRenderer;
+    public final Camera camera;
     public Vec3 cameraEntityPos;
-    public RenderTarget renderTarget;
-    public RenderBuffers buffers;
-    public ParticleEngine particleEngine;
+    public final RenderTarget renderTarget;
+    public final RenderBuffers buffers;
+    public final ParticleEngine particleEngine;
     public RenderingContext(){
         Validate.isTrue(!RenderingManager.isEnvModified());
         var client = Minecraft.getInstance();

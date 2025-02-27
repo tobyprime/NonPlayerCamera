@@ -24,7 +24,7 @@ public class ServerCameraManager {
     public static final TicketType<ChunkPos> CAMERA_CHUNK_TICKET =
             TicketType.create(Global.MOD_ID+":camera_chunk_ticket", Comparator.comparingLong(ChunkPos::toLong),5);
 
-    public static Map<UUID, Map<ResourceLocation, ServerCamera>> camerasPerPlayer = new HashMap<>();
+    public static final Map<UUID, Map<ResourceLocation, ServerCamera>> camerasPerPlayer = new HashMap<>();
 
     public static void tick(){
         for (Map.Entry<UUID, Map<ResourceLocation, ServerCamera>> entry : camerasPerPlayer.entrySet()){

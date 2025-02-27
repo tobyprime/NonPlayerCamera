@@ -1,6 +1,5 @@
 package top.tobyprime.nonplayercamera.client.common;
 
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
@@ -26,8 +25,8 @@ import top.tobyprime.nonplayercamera.utils.Helper;
  * 原版仅存储玩家周围的区块，修改为对每个相机都存储其周围的区块。{@link top.tobyprime.nonplayercamera.client.mixin.MixinClientLevel#setChunkSource} 中将原版ClientChunkCache替换为此类
  */
 public class SuperChunkCache extends ClientChunkCache {
-    public ConcurrentMap<Camera, Storage> storages = new ConcurrentHashMap<>();
-    public ClientLevel level;
+    public final ConcurrentMap<Camera, Storage> storages = new ConcurrentHashMap<>();
+    public final ClientLevel level;
 
     public SuperChunkCache(ClientLevel level) {
         super(level, 0);
@@ -51,7 +50,7 @@ public class SuperChunkCache extends ClientChunkCache {
         }
     }
 
-    public Storage fullyUpdateStorageForCamera(Camera camera) {
+    public void fullyUpdateStorageForCamera(Camera camera) {
         var oldStorage = storages.get(camera);
         var storage = new Storage(getCameraViewDistance(camera) * 2);
 
@@ -66,7 +65,6 @@ public class SuperChunkCache extends ClientChunkCache {
             reAssignRemovedStorageData(oldStorage);
         }
         Helper.dbg("fully updating storage");
-        return storage;
     }
 
 
@@ -118,7 +116,7 @@ public class SuperChunkCache extends ClientChunkCache {
         if (Minecraft.getInstance().level == null) {
             return;
         }
-        var currentSuperChunkCache = ((SuperChunkCache) Minecraft.getInstance().level.getChunkSource());
+        var currentSuperChunkCache = (SuperChunkCache) RenderingManager.getCurrentContext().level.getChunkSource();
 
         if (mainCameraSuperChunkCache != null) {
             if (mainCameraSuperChunkCache != currentSuperChunkCache) {
@@ -238,7 +236,7 @@ public class SuperChunkCache extends ClientChunkCache {
 
     @Override
     public void updateViewCenter(int x, int z) {
-        return;
+
     }
 
     @Override

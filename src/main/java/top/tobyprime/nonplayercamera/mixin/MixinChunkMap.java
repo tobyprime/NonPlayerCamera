@@ -1,12 +1,10 @@
 package top.tobyprime.nonplayercamera.mixin;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ChunkMap;
 
 import net.minecraft.server.level.PlayerMap;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +24,7 @@ import java.util.Set;
 @Mixin(ChunkMap.class)
 public abstract class MixinChunkMap implements BridgeChunkMap {
     @Shadow
-    protected static boolean isChunkOnRangeBorder(int i, int j, int k, int l, int m) {
+    private static boolean isChunkOnRangeBorder(int i, int j, int k, int l, int m) {
         return false;
     }
 
@@ -36,7 +34,7 @@ public abstract class MixinChunkMap implements BridgeChunkMap {
     }
 
     @Shadow @Final private PlayerMap playerMap;
-    @Shadow private int viewDistance;
+    @Shadow int viewDistance;
     @Unique
     private final Set<ServerCamera> activateCameras = new HashSet<>();
 

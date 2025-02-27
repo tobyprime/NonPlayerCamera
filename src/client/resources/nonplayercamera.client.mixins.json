@@ -6,6 +6,7 @@
   "client": [
     "MixinCamera",
     "MixinClientLevel",
+    "MixinGameRenderer",
     "MixinLevelRenderer",
     "MixinMinecraft",
     "MixinRenderChunk"

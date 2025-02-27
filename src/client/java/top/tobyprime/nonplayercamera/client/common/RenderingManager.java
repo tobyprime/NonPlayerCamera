@@ -4,13 +4,12 @@ import java.util.*;
 import java.util.logging.Level;
 
 import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.resources.ResourceKey;
 import top.tobyprime.nonplayercamera.client.render.RenderingContext;
 
 public class RenderingManager {
-    public static Stack<RenderingContext> renderingContextStack = new Stack<>();
+    public static final Stack<RenderingContext> renderingContextStack = new Stack<>();
     public static Map<ResourceKey<Level>, Set<Camera>> activatedCameras = new HashMap<>();
     public static Map<Camera, LevelRenderer> levelRendererMap = new HashMap<>();
     public static RenderingContext mainRenderingContext;

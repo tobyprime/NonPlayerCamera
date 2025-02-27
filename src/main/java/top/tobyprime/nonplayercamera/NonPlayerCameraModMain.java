@@ -2,7 +2,6 @@ package top.tobyprime.nonplayercamera;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 
@@ -17,7 +16,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import org.jetbrains.annotations.Nullable;
 import top.tobyprime.nonplayercamera.common.ServerCameraManager;
 import top.tobyprime.nonplayercamera.networking.ServerPacketHandler;
 
@@ -33,9 +31,7 @@ public class NonPlayerCameraModMain implements ModInitializer {
         Registry.register(Registry.BLOCK, new ResourceLocation("test", "test_block"), TEST_BLOCK);
         Registry.register(Registry.ITEM, new ResourceLocation("test", "test_block"), new BlockItem(TEST_BLOCK, new Item.Properties()));
 
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            ServerCameraManager.tick();
-        });
+        ServerTickEvents.END_SERVER_TICK.register(server -> ServerCameraManager.tick());
         ServerPacketHandler.init();
     }
 
