@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import top.tobyprime.nonplayercamera.common.ServerCameraManager;
-import top.tobyprime.nonplayercamera.networking.ServerPacketHandler;
 
 public class NonPlayerCameraModMain implements ModInitializer {
     public static final String MOD_ID = "nonplayercamera";
@@ -32,7 +31,6 @@ public class NonPlayerCameraModMain implements ModInitializer {
         Registry.register(Registry.ITEM, new ResourceLocation("test", "test_block"), new BlockItem(TEST_BLOCK, new Item.Properties()));
 
         ServerTickEvents.END_SERVER_TICK.register(server -> ServerCameraManager.tick());
-        ServerPacketHandler.init();
     }
 
     public static class TestBlock extends BaseEntityBlock {
