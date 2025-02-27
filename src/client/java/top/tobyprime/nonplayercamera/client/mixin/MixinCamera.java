@@ -23,12 +23,12 @@ public class MixinCamera {
             return;
         }
         if (RenderingManager.isEnvModified()){
-            ((SuperChunkCache) RenderingManager.mainRenderingContext.level.getChunkSource()).onCameraUpdated((Camera) (Object)this);
+            SuperChunkCache.onMainCameraUpdated((Camera) (Object)this);
             return;
         }
         if (Minecraft.getInstance().level==null) return;
 
-        ((SuperChunkCache)Minecraft.getInstance().level.getChunkSource()).onCameraUpdated((Camera) (Object)this);
+        SuperChunkCache.onMainCameraUpdated((Camera) (Object)this);
     }
 
     @Inject(method = "setPosition(Lnet/minecraft/world/phys/Vec3;)V", at = @At("TAIL"))
@@ -37,9 +37,9 @@ public class MixinCamera {
             return;
         }
         if (RenderingManager.isEnvModified()){
-            ((SuperChunkCache) RenderingManager.mainRenderingContext.level.getChunkSource()).onCameraUpdated((Camera) (Object)this);
+            SuperChunkCache.onMainCameraUpdated((Camera) (Object)this);
             return;
         }
-        ((SuperChunkCache)Minecraft.getInstance().level.getChunkSource()).onCameraUpdated((Camera) (Object)this);
+        SuperChunkCache.onMainCameraUpdated((Camera) (Object)this);
     }
 }

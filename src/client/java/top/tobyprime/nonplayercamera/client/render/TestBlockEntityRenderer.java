@@ -21,7 +21,6 @@ import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.
 import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.testCamera;
 
 public class TestBlockEntityRenderer implements BlockEntityRenderer<NonPlayerCameraModMain.TestBlockEntity> {
-    public static NonPlayerCameraModMain.TestBlockEntity closestBlock = null;
     public TestBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
 
     }
@@ -52,29 +51,12 @@ public class TestBlockEntityRenderer implements BlockEntityRenderer<NonPlayerCam
 
     @Override
     public void render(NonPlayerCameraModMain.TestBlockEntity entity, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
-        if (testCamera==null){
-
-            var camera = new SuperCamera(new ResourceLocation("tst","test"));
-            camera.setPosition(entity.getBlockPos().getX(), entity.getBlockPos().getY(), entity.getBlockPos().getZ());
-            camera.setDimension(entity.getLevel().dimension());
-            camera.target = NonPlayerCameraModClientMain.testFrameBuffer;
-            camera.enable();
-            testCamera = camera;
-        }
          if (RenderingManager.isEnvModified()){
              return;
          }
-         if (closestBlock==null){
-             closestBlock = entity;
-         }
-         var cameraPrePos = testCamera.getPosition();
-         var playerPos = Minecraft.getInstance().player.position();
-         var dist = playerPos.distanceTo(Vec3.atCenterOf(entity.getBlockPos()));
-         var distPre = playerPos.distanceTo(Vec3.atCenterOf(closestBlock.getBlockPos()));
+
          var fov = (float)NonPlayerCameraModClientMain.testFrameBuffer.width/ NonPlayerCameraModClientMain.testFrameBuffer.height;
-         if (dist < distPre) {
-             closestBlock = entity;
-         }
+
          RenderSystem.setShaderTexture(0, NonPlayerCameraModClientMain.testFrameBuffer.getColorTextureId());
          needRender = true;
 
@@ -90,9 +72,7 @@ public class TestBlockEntityRenderer implements BlockEntityRenderer<NonPlayerCam
          RenderSystem.enableCull();
          RenderSystem.disableDepthTest();
 
-         matrices.popPose();
-         testCamera.setPosition(cameraPrePos);
-    }
+         matrices.popPose();}
 
 
 

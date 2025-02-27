@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.core.BlockPos;
@@ -14,11 +15,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.apache.commons.lang3.Validate;
 import top.tobyprime.nonplayercamera.client.mixin.MixinLevelRenderer;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeLevelRenderer;
 import top.tobyprime.nonplayercamera.common.ServerCamera;
 import top.tobyprime.nonplayercamera.networking.UpdateCameraC2S;
 import top.tobyprime.nonplayercamera.networking.UpdateCameraPosC2S;
+
+import java.util.HashSet;
 
 public class SuperCamera extends Camera {
     private ResourceKey<Level> dimension;
@@ -27,17 +31,20 @@ public class SuperCamera extends Camera {
     private final ResourceLocation identifier;
     public RenderBuffers renderBuffers = new RenderBuffers();
     private BlockPos preUpdatedBlockPos = new BlockPos(0, 0, 0);
-    public boolean isolatedStorage = false;
+    public final boolean isolatedStorage = false;
     public RenderTarget target;
     public double fov = 70;
     public float cameraDepth = 0.05F;
     public LevelRenderer renderer;
+    public ClientLevel level;
 
     public SuperCamera(ResourceLocation identifier) {
         this.identifier = identifier;
         this.renderBuffers = new RenderBuffers();
         this.renderer = new LevelRenderer(Minecraft.getInstance(), renderBuffers);
-        ((BridgeLevelRenderer)this.renderer).setCamera(this);
+        Minecraft.getInstance().resourceManager.registerReloadListener(this.renderer);
+
+        ((BridgeLevelRenderer) this.renderer).setCamera(this);
         this.renderer.graphicsChanged();
     }
 
@@ -68,11 +75,25 @@ public class SuperCamera extends Camera {
         if (this.dimension == dimension) {
             return;
         }
-        var preChunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
-        this.renderer.setLevel(LevelManager.get(dimension));
-        this.renderer.getChunkRenderDispatcher().setCamera(this.getPosition());
+        var preDimension = this.dimension;
+        if (isolatedStorage){
+
+            if (this.level != null) {
+                ((SuperChunkCache)this.level.getChunkSource()).removeCamera(this);
+            }
+        }
+
+
         this.dimension = dimension;
-        preChunkSource.onCameraUpdated(this);
+        this.level = LevelManager.get(dimension);
+        this.renderer.setLevel(this.level);
+        this.renderer.getChunkRenderDispatcher().setCamera(this.getPosition());
+        LevelManager.onCameraLevelUpdated(this, preDimension);
+
+        if (!isolatedStorage) {return;}
+        Validate.notNull(this.level);
+
+        ((SuperChunkCache)this.level.getChunkSource()).addCamera(this);
 
         notifyAllUpdated();
     }
@@ -113,10 +134,10 @@ public class SuperCamera extends Camera {
 
     public void notifyPositionUpdated() {
         if (LevelManager.get(dimension) == null) return;
-        if (isolatedStorage) {
-            var chunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
-            chunkSource.onCameraUpdated(this);
+        if (!isolatedStorage) {
+            return;
         }
+        ((SuperChunkCache)level.getChunkSource()).onCameraMoved(this);
 
         if (preUpdatedBlockPos.closerThan(this.getBlockPosition(), 4)) {
             return;
@@ -129,9 +150,8 @@ public class SuperCamera extends Camera {
     public void notifyAllUpdated() {
         if (LevelManager.get(dimension) == null) return;
 
-        if (isolatedStorage) {
-            var chunkSource = (SuperChunkCache) LevelManager.get(dimension).getChunkSource();
-            chunkSource.onCameraUpdated(this);
+        if (!isolatedStorage) {
+            return;
         }
 
 
@@ -142,7 +162,5 @@ public class SuperCamera extends Camera {
         serverCamera.identifier = this.identifier;
 
         Minecraft.getInstance().getConnection().send(new UpdateCameraC2S(serverCamera));
-
-        return;
     }
 }

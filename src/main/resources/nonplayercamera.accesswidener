@@ -63,9 +63,12 @@ accessible field net/minecraft/client/Minecraft window Lcom/mojang/blaze3d/platf
 
 accessible field net/minecraft/client/Minecraft renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
 accessible field net/minecraft/client/Minecraft blockEntityRenderDispatcher Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderDispatcher;
+
 mutable field net/minecraft/client/Minecraft renderBuffers Lnet/minecraft/client/renderer/RenderBuffers;
+
 accessible field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
 mutable field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
+
 accessible field net/minecraft/client/multiplayer/ClientLevel levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
 mutable field net/minecraft/client/multiplayer/ClientLevel levelRenderer Lnet/minecraft/client/renderer/LevelRenderer;
 
@@ -77,9 +80,6 @@ accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunk
 
 accessible field net/minecraft/client/multiplayer/ClientChunkCache emptyChunk Lnet/minecraft/world/level/chunk/LevelChunk;
 
-accessible field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
-
-mutable field net/minecraft/client/multiplayer/ClientLevel chunkSource Lnet/minecraft/client/multiplayer/ClientChunkCache;
 
 
 accessible class net/minecraft/client/multiplayer/ClientChunkCache$Storage
@@ -101,3 +101,7 @@ extendable method net/minecraft/client/multiplayer/ClientChunkCache$Storage dump
 
 accessible field net/minecraft/client/Minecraft particleEngine Lnet/minecraft/client/particle/ParticleEngine;
 mutable field net/minecraft/client/Minecraft particleEngine Lnet/minecraft/client/particle/ParticleEngine;
+
+accessible field net/minecraft/client/Minecraft resourceManager Lnet/minecraft/server/packs/resources/ReloadableResourceManager;
+
+accessible field net/minecraft/client/multiplayer/ClientChunkCache$Storage chunkRadius I

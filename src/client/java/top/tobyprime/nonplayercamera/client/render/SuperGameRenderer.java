@@ -13,6 +13,9 @@ import top.tobyprime.nonplayercamera.client.common.SuperCamera;
 
 public class SuperGameRenderer {
     public static void render(SuperCamera camera, float partialTicks, long nanoTime) {
+        if (Minecraft.getInstance().cameraEntity == null) {
+            return;
+        }
         var context = new RenderingContext(camera);
         RenderingManager.begin(context);
 
@@ -23,7 +26,7 @@ public class SuperGameRenderer {
 
     public static void renderLevel(SuperCamera camera, float tickDelta, long limitTime, PoseStack matrices) {
         // todo: profile
-        // todo: 天气渲染有问题, 部分区块不渲染
+        // todo: 天气渲染有问题, 部分区块不渲染, 有时无法加载进游戏
 
         var client = Minecraft.getInstance();
         var gameRenderer = client.gameRenderer;
@@ -46,6 +49,5 @@ public class SuperGameRenderer {
 
         Minecraft.getInstance().levelRenderer.prepareCullFrustum(matrices, camera.getPosition(), camera.getBasicProjectionMatrix());
         Minecraft.getInstance().levelRenderer.renderLevel(matrices, tickDelta, limitTime, false, camera, gameRenderer, Minecraft.getInstance().gameRenderer.lightTexture(), matrix4f);
-        Minecraft.getInstance().mainRenderTarget.unbindWrite();
     }
 }

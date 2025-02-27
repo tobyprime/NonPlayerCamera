@@ -4,17 +4,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import top.tobyprime.nonplayercamera.client.common.LevelManager;
+import top.tobyprime.nonplayercamera.client.common.SuperCamera;
 import top.tobyprime.nonplayercamera.client.common.SuperChunkCache;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
 
@@ -22,17 +25,45 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Mixin(ClientLevel.class)
-public class MixinClientLevel implements BridgeClientLevel {
-    @Shadow
-    public ClientChunkCache chunkSource;
+public abstract class MixinClientLevel implements BridgeClientLevel {
 
+    @Shadow
+    @Mutable
+    public ClientChunkCache chunkSource;
     @Unique
     public ParticleEngine levelParticleEngine;
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    public void injectInit(ClientPacketListener connection, ClientLevel.ClientLevelData clientLevelData, ResourceKey dimension, Holder dimensionType, int viewDistance, int serverSimulationDistance, Supplier profiler, LevelRenderer levelRenderer, boolean isDebug, long biomeZoomSeed, CallbackInfo ci) {
-        this.chunkSource = new SuperChunkCache((ClientLevel) (Object) this);
+    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/multiplayer/ClientLevel;chunkSource:Lnet/minecraft/client/multiplayer/ClientChunkCache;"))
+    public void setChunkSource(ClientLevel instance, ClientChunkCache value) {
+        this.chunkSource = new SuperChunkCache(instance);
     }
+
+
+    @Inject(method = "setBlocksDirty", at = @At("HEAD"))
+    void setBlockDirty(BlockPos blockPos, BlockState oldState, BlockState newState, CallbackInfo ci) {
+        var dimension = ((ClientLevel) (Object) this).dimension();
+        for (var camera : LevelManager.getCamerasInDimension(dimension)) {
+            ((SuperCamera) camera).renderer.setBlockDirty(blockPos, oldState, newState);
+        }
+        if (dimension == Minecraft.getInstance().level.dimension()) {
+            Minecraft.getInstance().levelRenderer.setBlockDirty(blockPos, oldState, newState);
+        }
+    }
+
+    @Inject(method = "setSectionDirtyWithNeighbors", at = @At("HEAD"))
+    void setSectionDirtyWithNeighbors(int sectionX, int sectionY, int sectionZ, CallbackInfo ci) {
+        var dimension = ((ClientLevel) (Object) this).dimension();
+        for (var camera : LevelManager.getCamerasInDimension(dimension)) {
+            ((SuperCamera) camera).renderer.setSectionDirtyWithNeighbors(sectionX, sectionY, sectionZ);
+        }
+        if (dimension == Minecraft.getInstance().level.dimension()) {
+            Minecraft.getInstance().levelRenderer.setSectionDirtyWithNeighbors(sectionX, sectionY, sectionZ);
+        }
+    }
+
+
+    /// Begin impl for `BridgeClientLevel`
+
 
     @Override
     public ParticleEngine getParticleEngine() {
@@ -43,4 +74,5 @@ public class MixinClientLevel implements BridgeClientLevel {
     public void setParticleEngine(ParticleEngine particleEngine) {
         levelParticleEngine = particleEngine;
     }
+
 }

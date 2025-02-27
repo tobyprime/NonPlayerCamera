@@ -1,10 +1,13 @@
 package top.tobyprime.nonplayercamera.client.common;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 
@@ -20,29 +23,66 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 import top.tobyprime.nonplayercamera.client.mixin_bridge.BridgeClientLevel;
+import top.tobyprime.nonplayercamera.utils.Helper;
 
 
 public class LevelManager {
     // for init chunk cache;
     public static ResourceKey<Level> onCreatingDimension = null;
     public static Map<ResourceKey<Level>, ClientLevel> levelMap = new HashMap<>();
+    public static Map<ResourceKey<Level>, Set<SuperCamera>> cameraSetPerLevel = new HashMap<>();
 
     public static @Nullable ClientLevel get(ResourceKey<Level> dimension){
         return levelMap.get(dimension);
     }
 
-    public static Level getOrCreateLevel(ResourceKey<Level> dimention){
-        if (!levelMap.containsKey(dimention)) {
-            levelMap.put(dimention, createLevel(dimention));
+
+    public static void onCameraLevelUpdated(SuperCamera camera,ResourceKey<Level> preDimension){
+        var cameraSet = LevelManager.cameraSetPerLevel.get(preDimension);
+        if (cameraSet != null) {
+            cameraSet.remove(camera);
         }
-        return levelMap.get(dimention);
+
+        cameraSet = cameraSetPerLevel.computeIfAbsent(camera.getDimension(), k -> new HashSet<>());
+        cameraSet.add(camera);
+    }
+
+    public static void close(){
+        for(ClientLevel level : levelMap.values()){
+            try {
+                level.close();
+            } catch (IOException e) {
+                Helper.err("Failed to close level " + level);
+            }
+        }
+        for (var cameras : cameraSetPerLevel.values()){
+            for (var camera : cameras){
+                camera.renderer.close();
+            }
+        }
+        cameraSetPerLevel = new HashMap<>();
+        levelMap = new HashMap<>();
+    }
+
+    public static Set<SuperCamera> getCamerasInDimension(ResourceKey<Level> dimension){
+        var cameras = cameraSetPerLevel.get(dimension);
+        if(cameras == null){
+            return new HashSet<>();
+        }
+        return cameras;
+    }
+
+    public static Level getOrCreateLevel(ResourceKey<Level> dimension){
+        if (!levelMap.containsKey(dimension)) {
+            levelMap.put(dimension, createLevel(dimension));
+        }
+        return levelMap.get(dimension);
     }
 
 
 
     private static Set<ResourceKey<Level>> getAvailableLevelKeys() {
-        Set<ResourceKey<Level>> keys = Minecraft.getInstance().getConnection().levels();
-        return keys;
+        return DimensionTypeManager.getAvailableDimensions();
     }
 
     private static ClientLevel createLevel(ResourceKey<Level> dimension) {
@@ -101,7 +141,8 @@ public class LevelManager {
         onCreatingDimension = null;
     
         client.getProfiler().pop();
-    
+        Minecraft.getInstance().resourceManager.registerReloadListener(levelRenderer);
+
         return newLevel;
     }
 

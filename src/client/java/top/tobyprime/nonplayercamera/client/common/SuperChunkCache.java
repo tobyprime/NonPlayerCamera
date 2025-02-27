@@ -1,40 +1,32 @@
 package top.tobyprime.nonplayercamera.client.common;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import com.mojang.bridge.Bridge;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientChunkCache.Storage;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.core.Holder;
+import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData.BlockEntityTagOutput;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.tobyprime.nonplayercamera.utils.Helper;
 
 /**
- * 原版仅存储玩家周围的区块，修改为对每个相机都存储其周围的区块。{@link top.tobyprime.nonplayercamera.client.mixin.MixinClientLevel#injectInit} 中将原版ClientChunkCache替换为此类
+ * 原版仅存储玩家周围的区块，修改为对每个相机都存储其周围的区块。{@link top.tobyprime.nonplayercamera.client.mixin.MixinClientLevel#setChunkSource} 中将原版ClientChunkCache替换为此类
  */
 public class SuperChunkCache extends ClientChunkCache {
-    public Map<Camera, Storage> storages = new HashMap<>();
+    public ConcurrentMap<Camera, Storage> storages = new ConcurrentHashMap<>();
     public ClientLevel level;
 
     public SuperChunkCache(ClientLevel level) {
@@ -43,60 +35,108 @@ public class SuperChunkCache extends ClientChunkCache {
         this.storage = null;
     }
 
-    public void onCameraUpdated(Camera camera) {
-        var storage = storages.get(camera);
-
-        var viewDistance = Minecraft.getInstance().options.getEffectiveRenderDistance();
-
-        if (camera instanceof SuperCamera) {
-            boolean enabled = ((SuperCamera) camera).isEnabled();
-            boolean inLevel = ((SuperCamera) camera).getDimension() == this.level.dimension();
-
-            if (!(enabled || inLevel) && storage != null) {
-                Helper.log("on camera leave");
-                storages.remove(camera);
-                return;
-            }
-            viewDistance = ((SuperCamera) camera).getViewDistance();
-        }
-
-        var newChunkPos = new ChunkPos(camera.getBlockPosition());
-        if (storage != null) {
-            int x = storage.viewCenterX - newChunkPos.x;
-            int z = storage.viewCenterZ - newChunkPos.z;
-
-            if (x * x + z * z < viewDistance * viewDistance) {
-                return;
-            }
-        }
-
-
-        Storage newStorage = new Storage(viewDistance * 2);
+    public void reAssignRemovedStorageData(Storage storage) {
         if (storage == null) {
-            Helper.log("on camera in");
-            storages.put(camera, newStorage);
             return;
         }
-
-        newStorage.viewCenterX = newChunkPos.x;
-        newStorage.viewCenterZ = newChunkPos.z;
-
-
-        Helper.log("on camera storage move");
-
-        storages.replace(camera, newStorage);
-
-
         for (int k = 0; k < storage.chunks.length(); ++k) {
             LevelChunk levelChunk = storage.chunks.get(k);
             if (levelChunk != null) {
                 ChunkPos chunkPos = levelChunk.getPos();
                 var targetStorage = getStorageAt(chunkPos.x, chunkPos.z);
                 if (targetStorage != null) {
-                    targetStorage.replace(newStorage.getIndex(chunkPos.x, chunkPos.z), levelChunk);
+                    targetStorage.replace(targetStorage.getIndex(chunkPos.x, chunkPos.z), levelChunk);
                 }
             }
         }
+    }
+
+    public Storage fullyUpdateStorageForCamera(Camera camera) {
+        var oldStorage = storages.get(camera);
+        var storage = new Storage(getCameraViewDistance(camera) * 2);
+
+        var cameraChunkPos = new ChunkPos(camera.getBlockPosition());
+
+        storage.viewCenterX = cameraChunkPos.x;
+        storage.viewCenterZ = cameraChunkPos.z;
+
+        storages.put(camera, storage);
+
+        if (oldStorage != null) {
+            reAssignRemovedStorageData(oldStorage);
+        }
+        Helper.dbg("fully updating storage");
+        return storage;
+    }
+
+
+
+    public void onCameraViewDistanceChanged(Camera camera) {
+        var oldStorage = storages.get(camera);
+        if (oldStorage.chunkRadius == getCameraViewDistance(camera) * 2) return;
+        fullyUpdateStorageForCamera(camera);
+    }
+
+    public boolean shouldMoveStorage(Storage storage, Camera camera) {
+        var cameraChunkPos = new ChunkPos(camera.getBlockPosition());
+
+        var x = storage.viewCenterX - cameraChunkPos.x;
+        var z = storage.viewCenterZ - cameraChunkPos.z;
+        var t = storage.chunkRadius / 2;
+        return x * x + z * z > t * t;
+    }
+
+    public static int getCameraViewDistance(Camera camera) {
+        return camera instanceof SuperCamera ?
+                ((SuperCamera) camera).getViewDistance() :
+                Minecraft.getInstance().options.getEffectiveRenderDistance();
+    }
+
+    public void onCameraMoved(Camera camera) {
+        var oldStorage = storages.get(camera);
+        if (oldStorage != null && !shouldMoveStorage(oldStorage, camera)) {
+            return;
+        }
+        fullyUpdateStorageForCamera(camera);
+    }
+
+    public void addCamera(Camera camera) {
+        if (storages.containsKey(camera)) {
+            return;
+        }
+        fullyUpdateStorageForCamera(camera);
+    }
+
+    public void removeCamera(Camera camera) {
+        var storage = storages.remove(camera);
+        reAssignRemovedStorageData(storage);
+    }
+
+    public static SuperChunkCache mainCameraSuperChunkCache;
+
+    public static void onMainCameraUpdated(Camera camera) {
+        if (Minecraft.getInstance().level == null) {
+            return;
+        }
+        var currentSuperChunkCache = ((SuperChunkCache) Minecraft.getInstance().level.getChunkSource());
+
+        if (mainCameraSuperChunkCache != null) {
+            if (mainCameraSuperChunkCache != currentSuperChunkCache) {
+                mainCameraSuperChunkCache.removeCamera(camera);
+            }
+            return;
+        }
+        if (!currentSuperChunkCache.storages.containsKey(camera)) {
+            currentSuperChunkCache.addCamera(camera);
+        }
+        var chunkSource = currentSuperChunkCache.storages.get(camera);
+
+        if (getCameraViewDistance(camera) * 2 != chunkSource.chunkRadius) {
+            currentSuperChunkCache.fullyUpdateStorageForCamera(camera);
+            return;
+        }
+
+        currentSuperChunkCache.onCameraMoved(camera);
 
     }
 
@@ -116,11 +156,21 @@ public class SuperChunkCache extends ClientChunkCache {
     }
 
     @Override
+    public void onLightUpdate(LightLayer layer, SectionPos pos) {
+        for (var camera : LevelManager.getCamerasInDimension(this.level.dimension())) {
+            camera.renderer.setSectionDirty(pos.x(), pos.y(), pos.z());
+        }
+        if (this.level == Minecraft.getInstance().level) {
+            Minecraft.getInstance().levelRenderer.setSectionDirty(pos.x(), pos.y(), pos.z());
+        }
+    }
+
+    @Override
     public LevelChunk replaceWithPacketData(int x, int z, FriendlyByteBuf buffer, CompoundTag tag,
                                             Consumer<BlockEntityTagOutput> consumer) {
         var storage = getStorageAt(x, z);
         if (storage == null) {
-            Helper.warn("fail load chunk at {" + x + ", " + z + "}: no storage found");
+            Helper.warn("fail load chunk at {" + x + ", " + z + "}: no oldStorage found");
 
             return null;
         }
@@ -173,8 +223,8 @@ public class SuperChunkCache extends ClientChunkCache {
 
     @Override
     public void updateViewRadius(int viewDistance) {
-        // todo: 目前无法更新视距
-        return;
+        var mainCamera = RenderingManager.getCurrentContext().camera;
+        onCameraViewDistanceChanged(mainCamera);
     }
 
     @Override

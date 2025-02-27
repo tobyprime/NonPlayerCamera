@@ -36,8 +36,10 @@ public class RenderingContext {
         this.camera = client.gameRenderer.getMainCamera();
         this.level = client.level;
         this.levelRenderer = client.levelRenderer;
+        if (client.cameraEntity != null) {
+            this.cameraEntityPos = client.cameraEntity.position();
+        }
 
-        this.cameraEntityPos = client.cameraEntity.position();
         this.renderTarget = client.mainRenderTarget;
         this.buffers = client.gameRenderer.renderBuffers;
         this.particleEngine = client.particleEngine;
@@ -60,22 +62,25 @@ public class RenderingContext {
     
         gameRenderer.mainCamera = camera;
         
-        client.level = level;
-        client.level.levelRenderer = levelRenderer;
+        client.level = this.level;
+        client.level.levelRenderer = this.levelRenderer;
 
-        client.levelRenderer = levelRenderer;
-        client.levelRenderer.renderBuffers = buffers;
+        client.levelRenderer = this.levelRenderer;
+        client.levelRenderer.renderBuffers = this.buffers;
 
-        client.cameraEntity.setPos(cameraEntityPos);
-        client.cameraEntity.level = level;
+        if (cameraEntityPos!=null&& client.cameraEntity!=null)
+        {
+            client.cameraEntity.setPos(cameraEntityPos);
+            client.cameraEntity.level = this.level;
+        }
         
-        client.mainRenderTarget = renderTarget;
+        client.mainRenderTarget = this.renderTarget;
 
-        client.gameRenderer.renderBuffers = buffers;
-        client.gameRenderer.mainCamera = camera;
+        client.gameRenderer.renderBuffers = this.buffers;
+        client.gameRenderer.mainCamera = this.camera;
 
         client.particleEngine = this.particleEngine;
-        client.blockEntityRenderDispatcher.setLevel(level);
+        client.blockEntityRenderDispatcher.setLevel(this.level);
 
         renderTarget.bindWrite(true);
     }

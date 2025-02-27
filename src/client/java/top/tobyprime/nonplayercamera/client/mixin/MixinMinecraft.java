@@ -2,26 +2,20 @@ package top.tobyprime.nonplayercamera.client.mixin;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.world.entity.vehicle.Minecart;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain;
 import top.tobyprime.nonplayercamera.client.common.LevelManager;
@@ -32,7 +26,7 @@ import top.tobyprime.nonplayercamera.client.render.SuperGameRenderer;
 
 
 import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.needRender;
-import static top.tobyprime.nonplayercamera.client.render.TestBlockEntityRenderer.closestBlock;
+import static top.tobyprime.nonplayercamera.client.NonPlayerCameraModClientMain.testCamera;
 
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft {
@@ -78,7 +72,7 @@ public abstract class MixinMinecraft {
         }
 
         LevelManager.levelMap.put(dimension, levelClient);
-        ((SuperChunkCache) levelClient.getChunkSource()).onCameraUpdated(this.gameRenderer.mainCamera);
+        ((SuperChunkCache) levelClient.getChunkSource()).onMainCameraUpdated(this.gameRenderer.mainCamera);
     }
 
     // for test
@@ -95,11 +89,11 @@ public abstract class MixinMinecraft {
             return;
         }
         if (NonPlayerCameraModClientMain.testCamera == null) {
-            return;
-        }
-        NonPlayerCameraModClientMain.testCamera.setRotation(mc.gameRenderer.mainCamera.getYRot(), mc.gameRenderer.mainCamera.getXRot());
-        if (closestBlock == null) {
-            return;
+            var camera = new SuperCamera(new ResourceLocation("tst","test"));
+            camera.setDimension(Minecraft.getInstance().player.getLevel().dimension());
+            camera.target = NonPlayerCameraModClientMain.testFrameBuffer;
+            camera.enable();
+            testCamera = camera;
         }
 
         if (mc.getMainRenderTarget().width != NonPlayerCameraModClientMain.testFrameBuffer.width) {
@@ -115,4 +109,6 @@ public abstract class MixinMinecraft {
 
         SuperGameRenderer.render((SuperCamera) testCamera, pausePartialTick, Util.getNanos());
     }
+
+
 }
